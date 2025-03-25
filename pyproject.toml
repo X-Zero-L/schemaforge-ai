@@ -1,0 +1,12 @@
+[project]
+name = "schemaforge-ai-all-in-one"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi[all]>=0.115.12",
+    "logfire>=3.9.0",
+    "pydantic>=2.10.6",
+    "pydantic-ai[all]>=0.0.43",
+]
