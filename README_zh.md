@@ -222,6 +222,18 @@ SchemaForge AI设计理念注重灵活性。您可以通过`提供商:模型名�
 
 这有助于让不同背景和生态系统的开发者更容易使用SchemaForge AI。通过拉取请求或在讨论区分享您的示例。
 
+## 🙏 致谢
+
+SchemaForge AI 构建在多个优秀的开源项目基础上：
+
+- [PydanticAI](https://ai.pydantic.dev) - 强大的Agent框架，使构建生产级生成式AI应用变得更加简单
+- [Logfire](https://logfire.pydantic.dev/docs/) - 全面的日志和监控解决方案，有助于调试、性能监控和行为跟踪
+- FastAPI - 用于构建API的高性能Web框架
+- Pydantic - 使用Python类型注解进行数据验证和设置管理
+- 以及所有使本服务成为可能的AI模型提供商API
+
+我们感谢这些项目的维护者和贡献者的出色工作。
+
 ## 🤝 贡献
 
 欢迎贡献！如果您发现任何问题或有改进建议，请提交issue或PR。

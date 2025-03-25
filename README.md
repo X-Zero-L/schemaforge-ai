@@ -226,6 +226,18 @@ If you've implemented SchemaForge AI in your favorite language, please consider 
 
 This helps make SchemaForge AI more accessible to developers from different backgrounds and ecosystems. Submit your examples through a pull request or share them in the discussions.
 
+## 🙏 Acknowledgements
+
+SchemaForge AI builds upon the work of several amazing open-source projects:
+
+- [PydanticAI](https://ai.pydantic.dev) - The powerful agent framework that makes it less painful to build production-grade applications with Generative AI
+- [Logfire](https://logfire.pydantic.dev/docs/) - Comprehensive logging and monitoring solution that helps with debugging, performance monitoring, and behavior tracking
+- FastAPI - High-performance web framework for building APIs
+- Pydantic - Data validation and settings management using Python type annotations
+- And all the AI model providers whose APIs make this service possible
+
+We're grateful to the maintainers and contributors of these projects for their excellent work.
+
 ## 🤝 Contributing
 
 Contributions welcome! If you find any issues or have suggestions for improvements, please submit an issue or PR.
