@@ -1,7 +1,7 @@
 [project]
-name = "schemaforge-ai-all-in-one"
+name = "schemaforge-ai"
 version = "0.1.0"
-description = "Add your description here"
+description = "A Structured Data Generator and Validator based on pydantic-ai"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
