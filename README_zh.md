@@ -181,7 +181,47 @@ SchemaForge AI设计理念注重灵活性。您可以通过`提供商:模型名�
 
 使用格式指定任何模型：`提供商:模型名称`（例如，`openai:gpt-4o`或`anthropic:claude-3-sonnet-20240229`）
 
-## 🛠️ 高级配置
+## SDK 便捷集成
+
+为了更轻松地与您的应用程序集成，我们提供了官方Python SDK:
+
+<div align="center">
+  <h3>
+    <a href="https://github.com/X-Zero-L/schemaforge-sdk">
+      📦 SchemaForge SDK
+    </a>
+  </h3>
+  <p>Python应用程序的无缝集成</p>
+</div>
+
+该SDK提供了一个简洁的、Python风格的SchemaForge AI接口:
+
+```python
+from pydantic import BaseModel
+from schemaforge import SchemaForge
+
+# 初始化客户端
+client = SchemaForge(api_key="your_secure_api_key_here")
+
+# 定义Pydantic模型
+class Person(BaseModel):
+    name: str
+    age: int
+    occupation: str
+    email: str
+
+# 使用模型结构化文本
+person = client.structure(
+    content="张三是一位30岁的软件工程师，邮箱是zhangsan@example.com",
+    model_class=Person
+)
+print(person.model_dump())
+# {'name': '张三', 'age': 30, 'occupation': '软件工程师', 'email': 'zhangsan@example.com'}
+```
+
+[访问SDK仓库](https://github.com/X-Zero-L/schemaforge-sdk)获取安装说明、文档和示例。
+
+## 🛠️ 高级配置 
 
 查看[配置文档](docs/configuration.md)了解更多关于自定义选项的信息。
 
@@ -248,45 +288,3 @@ MIT
     <img src="https://img.shields.io/github/stars/X-Zero-L/schemaforge-ai?style=social" alt="Star on GitHub">
   </a> 
 </p>
-
-## SDK 便捷集成
-
-为了更轻松地与您的应用程序集成，我们提供了官方Python SDK:
-
-<div align="center">
-  <h3>
-    <a href="https://github.com/X-Zero-L/schemaforge-sdk">
-      📦 SchemaForge SDK
-    </a>
-  </h3>
-  <p>Python应用程序的无缝集成</p>
-</div>
-
-该SDK提供了一个简洁的、Python风格的SchemaForge AI接口:
-
-```python
-from pydantic import BaseModel
-from schemaforge import SchemaForge
-
-# 初始化客户端
-client = SchemaForge(api_key="your_secure_api_key_here")
-
-# 定义Pydantic模型
-class Person(BaseModel):
-    name: str
-    age: int
-    occupation: str
-    email: str
-
-# 使用模型结构化文本
-person = client.structure(
-    content="张三是一位30岁的软件工程师，邮箱是zhangsan@example.com",
-    model_class=Person
-)
-print(person.model_dump())
-# {'name': '张三', 'age': 30, 'occupation': '软件工程师', 'email': 'zhangsan@example.com'}
-```
-
-[访问SDK仓库](https://github.com/X-Zero-L/schemaforge-sdk)获取安装说明、文档和示例。
-
-## 🛠️ 高级配置 
