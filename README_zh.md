@@ -74,65 +74,145 @@ docker-compose up -d
 
 ## 💻 使用示例
 
-### 基本结构化请求
+`examples` 目录包含全面的示例，展示了如何使用SchemaForge AI：
+
+### 1. 预定义模型使用
 
 ```python
-import requests
+from pydantic import BaseModel, Field
 import json
+import httpx
 
-api_url = "http://localhost:8000/api/structure"
-api_key = "your_api_key_here"
+# 定义你的数据模型
+class Person(BaseModel):
+    name: str = Field(..., description="姓名")
+    age: int = Field(..., description="年龄")
+    height: float = Field(..., description="身高（厘米）")
+    occupation: str = Field(None, description="职业")
 
-content = "小明今年18岁，身高175cm，是一名学生。"
+# 发送文本进行结构化
+async def structure_data(content, model, api_key):
+    schema_json = model.model_json_schema()
+    
+    response = await httpx.AsyncClient().post(
+        "http://localhost:8000/api/v1/structure",
+        json={
+            "content": content,
+            "schema_description": json.dumps(schema_json),
+            "model_name": "openai:gpt-4o"
+        },
+        headers={"X-API-Key": api_key}
+    )
+    
+    return response.json()
 
-schema = {
-    "type": "object",
-    "properties": {
-        "name": {"type": "string", "description": "姓名"},
-        "age": {"type": "integer", "description": "年龄"},
-        "height": {"type": "number", "description": "身高（厘米）"},
-        "occupation": {"type": "string", "description": "职业"}
-    },
-    "required": ["name", "age", "height"]
-}
-
-response = requests.post(
-    api_url,
-    json={
-        "content": content,
-        "schema_description": json.dumps(schema),
-        "model_name": "openai:gpt-4o"
-    },
-    headers={"X-API-Key": api_key}
-)
-
-print(response.json())
+# 示例结果:
+# {
+#   "success": true,
+#   "data": {
+#     "name": "张三",
+#     "age": 32,
+#     "height": 175.5,
+#     "occupation": "软件工程师"
+#   },
+#   "model_used": "openai:gpt-4o"
+# }
 ```
 
-**响应:**
-```json
-{
-    "success": true,
-    "data": {
-        "name": "小明",
-        "age": 18,
-        "height": 175,
-        "occupation": "学生"
-    },
-    "error": null,
-    "model_used": "openai:gpt-4o"
-}
+### 2. 模型生成
+
+```python
+async def generate_model(sample_data, model_name, description, api_key):
+    response = await httpx.AsyncClient().post(
+        "http://localhost:8000/api/v1/generate-model",
+        json={
+            "sample_data": sample_data,
+            "model_name": model_name,
+            "description": description,
+            "llm_model_name": "openai:gpt-4o"
+        },
+        headers={"X-API-Key": api_key}
+    )
+    
+    return response.json()
+
+# 生成的模型代码可直接在应用中使用！
 ```
 
-更多示例请查看[examples](examples/)目录。
+查看[examples](examples/)目录获取更详细的示例，包括：
+
+- 结构化不同类型的内容（个人信息、图书、新闻文章）
+- 在相同任务上比较不同AI模型的表现
+- 从JSON、文本和CSV数据生成模型
+- 处理嵌套数据结构
+- 添加验证规则
 
 ## 🔍 API文档
 
 访问 http://localhost:8000/docs 获取完整的API文档。
 
+### 主要端点
+
+| 端点 | 描述 |
+|----------|-------------|
+| `/api/v1/structure` | 使用提供的架构结构化文本数据 |
+| `/api/v1/generate-model` | 从样本数据生成Pydantic模型 |
+
+## 🧠 支持的AI模型
+
+SchemaForge AI设计理念注重灵活性。您可以通过`提供商:模型名称`格式使用任何受支持提供商的模型：
+
+- **OpenAI**: 支持所有OpenAI模型，包括gpt-3.5-turbo、gpt-4、gpt-4o以及未来发布的新模型
+- **Anthropic**: 支持所有Claude模型，包括Claude 3系列（Opus、Sonnet、Haiku）及后续版本
+- **Google**: 支持Gemini系列模型，包括gemini-1.5-pro、gemini-1.5-flash及更新版本
+- **Mistral**: 支持所有Mistral AI模型，包括mistral-large、mistral-small及其最新版本
+- **Cohere**: 支持Command系列模型及Cohere发布的任何新模型
+- **Groq**: 支持通过Groq高速推理平台提供的LLaMA及其他模型
+
+该服务不会将您限制在特定的模型版本 - 当提供商发布新模型时，您可以立即在请求中指定使用它们，无需等待本服务更新。
+
+使用格式指定任何模型：`提供商:模型名称`（例如，`openai:gpt-4o`或`anthropic:claude-3-sonnet-20240229`）
+
 ## 🛠️ 高级配置
 
-查看[配置文档](docs/configuration.md)了解更多关于自定义和配置的信息。
+查看[配置文档](docs/configuration.md)了解更多关于自定义选项的信息：
+
+- 自定义系统提示词
+- 重试行为
+- 超时设置
+- 模型特定参数
+- 缓存选项
+
+## 🔮 未来计划
+
+我们正在不断努力改进SchemaForge AI。以下是我们计划实现的一些功能：
+
+- **增加AI提供商** - 扩展支持更多的LLM提供商
+- **增强输入处理** - 支持更复杂的输入格式，包括表格、PDF和图像
+- **性能优化** - 提高处理速度和资源利用率
+- **高级验证规则** - 为生成的模型提供更复杂的验证功能
+- **Web界面** - 基于浏览器的管理控制台，使配置和测试更加便捷
+- **输出格式扩展** - 支持生成Python/Pydantic以外的其他编程语言模型
+- **批处理API** - 在单一操作中高效处理多个结构化请求
+
+如果您对额外功能有建议，请在我们的[讨论区](https://github.com/X-Zero-L/schemaforge-ai/discussions)分享！
+
+## 🌍 多语言支持
+
+虽然我们的示例主要是Python语言，但SchemaForge AI的API可以与任何能够发送HTTP请求的编程语言集成。我们欢迎社区贡献其他语言的集成示例！
+
+如果您已经在您喜欢的编程语言中实现了SchemaForge AI的调用，请考虑分享您的代码示例。我们希望能够包含以下语言的示例：
+
+- JavaScript/TypeScript（Node.js、浏览器）
+- Java
+- Go
+- C#/.NET
+- PHP
+- Ruby
+- Rust
+- 以及更多！
+
+这有助于让不同背景和生态系统的开发者更容易使用SchemaForge AI。通过拉取请求或在讨论区分享您的示例。
 
 ## 🤝 贡献
 

@@ -1,68 +1,79 @@
-# Structured API Usage Examples
+# SchemaForge AI Examples
 
-This directory contains example code showing how to use predefined Pydantic models to call the structuring API, with support for multiple AI models.
+This directory contains comprehensive examples demonstrating how to use SchemaForge AI for structuring data and generating Pydantic models.
 
 *[中文文档](README_zh.md)*
 
-## Example Description
+## Quick Overview
 
-The `predefined_models.py` file demonstrates several use cases:
+The examples in this directory show two main ways to use SchemaForge AI:
 
-1. Person Information Structuring
-   - Uses the `Person` model
-   - Includes name, age, height, and occupation information
-   - Demonstrates how to use custom system prompts
+1. **Using Predefined Models** - Define Pydantic models manually and use them to structure data
+2. **Auto-Generating Models** - Generate Pydantic models automatically from sample data
 
-2. Book Information Structuring
-   - Uses the `BookInfo` model
-   - Includes title, author, publication year, price, and category information
-   - Shows how to handle list-type fields
+## File Descriptions
 
-3. News Article Structuring
-   - Uses the `NewsArticle` model
-   - Includes headline, content, date, source, and tag information
-   - Shows how to handle multi-line text content
+### `predefined_models.py`
 
-4. Model Comparison
-   - Demonstrates how to structure the same content using different AI models
-   - Compares results between OpenAI and Anthropic models
-   - Shows how to handle model-specific API errors
+Demonstrates using predefined Pydantic models to structure data from text inputs with several practical examples:
 
-## Authentication
+| Example                       | Description                                            | Model Used       |
+|-------------------------------|--------------------------------------------------------|------------------|
+| Person Information            | Extracts personal details from text                    | `Person`         |
+| Book Information              | Structures book metadata from descriptive text         | `BookInfo`       |
+| News Article                  | Parses news articles into structured data              | `NewsArticle`    |
+| Model Comparison              | Compares different AI models on the same task          | Multiple models  |
+| Custom Recipe Model           | Shows how to create and use a custom model             | `Recipe`         |
 
-The API requires authentication using an API key. To use the examples:
+### `model_generation_example.py`
 
-1. Make sure you have an `.env` file in the project root with your API key:
-```
-API_KEY=your_secure_api_key
-```
+Shows how to automatically generate Pydantic models from different types of data samples:
 
-2. The example code automatically loads this key and includes it in all requests.
+| Example                        | Description                                              | Data Format |
+|--------------------------------|----------------------------------------------------------|-------------|
+| Product Model                  | Generates a model from JSON product data                 | JSON        |
+| Customer Model with Requirements | Creates a model with specific validation requirements    | Text        |
+| Book Model                     | Generates a model from CSV-like data                     | CSV         |
+| Complex Nested Order Model     | Creates models with nested structures from complex JSON  | JSON        |
 
-3. If the API key is not set, the example will display a warning and exit.
+## Setting Up
 
-## How to Run Examples
+Before running these examples, make sure:
 
-1. Make sure the API service is running:
-```bash
-uvicorn app.main:app --reload
-```
+1. You have set up the SchemaForge AI service:
+   ```bash
+   git clone https://github.com/X-Zero-L/schemaforge-ai.git
+   cd schemaforge-ai
+   uv sync  # or pip install -r requirements.txt
+   ```
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+2. You have an API key in the `.env` file:
+   ```
+   API_KEY=your_api_key_here
+   ```
 
-3. Ensure your API key is set in the `.env` file
+3. The API service is running:
+   ```bash
+   uvicorn app.main:app --reload
+   ```
 
-4. Run the example:
+## Running the Examples
+
+To run any example:
+
 ```bash
 python examples/predefined_models.py
 ```
 
-## Using Custom Models
+or
 
-You can refer to the model definition method in the examples to create your own Pydantic models:
+```bash
+python examples/model_generation_example.py
+```
+
+## Creating Your Own Models
+
+You can create custom Pydantic models following this pattern:
 
 ```python
 from pydantic import BaseModel, Field
@@ -74,41 +85,40 @@ class YourModel(BaseModel):
     field3: Optional[List[str]] = Field(default_factory=list, description="Description of field3")
 ```
 
-Then use the `structure_data()` function to call the API with your preferred model:
+The `description` in each Field is important - it helps the AI understand what information to extract.
+
+## Generating Models
+
+If you don't want to define models manually, you can use the model generation API:
 
 ```python
-result = await structure_data(
-    content="Your text content",
-    model=YourModel,
-    system_prompt="Optional system prompt",
-    model_name="openai:gpt-4o"  # Specify the AI model to use
+result = await generate_model(
+    sample_data="Your sample data (JSON, text, CSV, etc.)",
+    model_name="YourModelName",
+    description="Description of what the model represents",
+    requirements="Optional specific requirements",
+    llm_model_name="openai:gpt-4o"  # Specify AI model to use
 )
+
+# The generated model code is available in:
+generated_code = result["model_code"]
 ```
 
-## Available Models
+## Best Practices
 
-The API supports various models from different providers, including:
+1. **Field Descriptions**: Always provide clear descriptions for each field
+2. **System Prompts**: Use system prompts to improve structuring accuracy for complex tasks
+3. **Model Selection**: Different models have different strengths - experiment to find the best for your use case
+4. **Validation Rules**: When generating models, specify validation requirements for better data quality
+5. **Error Handling**: Always check the `success` field in responses and handle errors appropriately
 
-- OpenAI models (gpt-3.5-turbo, gpt-4, gpt-4o)
-- Anthropic models (claude-3-opus-latest, claude-3-sonnet-latest)
-- Google models (gemini-1.5-pro, gemini-1.5-flash)
-- Mistral models (mistral-large-latest, mistral-small-latest)
+## Supported AI Models
 
-## Dynamic Model Creation
+The examples support various AI models including:
 
-The API service automatically extracts field information from the model's JSON Schema to create a dynamic Pydantic model. This allows you to:
+- **OpenAI**: gpt-3.5-turbo, gpt-4, gpt-4o
+- **Anthropic**: claude-3-opus-latest, claude-3-7-sonnet-latest
+- **Google**: gemini-1.5-pro, gemini-1.5-flash
+- **Mistral**: mistral-large-latest, mistral-small-latest
 
-1. Define structured data models using Pydantic
-2. Pass the model's JSON Schema to the API
-3. The API uses `create_model` to dynamically create a model with the same structure
-4. System prompts can guide the LLM in how to parse content
-
-## Notes
-
-1. Make good use of the Field description parameter when defining models, as it helps the API better understand the meaning of fields
-2. Use Optional type annotations for optional fields
-3. For list types, it's recommended to use default_factory=list as the default value
-4. System prompts can improve structuring accuracy, but are not required
-5. Different AI models may structure the same content slightly differently
-6. Make sure you have the appropriate API keys in your .env file for the models you want to use
-7. The API key is required for authentication unless the server has disabled authentication 
+Specify the model using the format: `provider:model_name` (e.g., `openai:gpt-4o`) 

@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     """Application settings configured via environment variables."""
 
     # API settings
-    API_V1_STR: str = "/api"
+    API_V1_STR: str = "/api/v1"
     PROJECT_NAME: str = "Structured API Service"
     PROJECT_DESCRIPTION: str = "Structured data processing API based on Pydantic-AI"
 

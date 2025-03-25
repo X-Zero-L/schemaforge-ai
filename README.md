@@ -78,66 +78,145 @@ docker-compose up -d
 
 ## 💻 Usage Examples
 
-### Basic Structuring Request
+The `examples` directory contains comprehensive examples showing how to use SchemaForge AI:
+
+### 1. Predefined Model Usage
 
 ```python
-import requests
+from pydantic import BaseModel, Field
 import json
+import httpx
 
-api_url = "http://localhost:8000/api/structure"
-api_key = "your_api_key_here"
+# Define your data model
+class Person(BaseModel):
+    name: str = Field(..., description="Person's full name")
+    age: int = Field(..., description="Age in years")
+    height: float = Field(..., description="Height in centimeters")
+    occupation: str = Field(None, description="Current occupation")
 
-content = "John is a 32-year-old software engineer, with a height of 182.5 centimeters."
+# Send text for structuring
+async def structure_data(content, model, api_key):
+    schema_json = model.model_json_schema()
+    
+    response = await httpx.AsyncClient().post(
+        "http://localhost:8000/api/v1/structure",
+        json={
+            "content": content,
+            "schema_description": json.dumps(schema_json),
+            "model_name": "openai:gpt-4o"
+        },
+        headers={"X-API-Key": api_key}
+    )
+    
+    return response.json()
 
-schema = {
-    "type": "object",
-    "properties": {
-        "name": {"type": "string", "description": "Person's name"},
-        "age": {"type": "integer", "description": "Age in years"},
-        "height": {"type": "number", "description": "Height in cm"},
-        "occupation": {"type": "string", "description": "Job title"}
-    },
-    "required": ["name", "age", "height"]
-}
-
-response = requests.post(
-    api_url,
-    json={
-        "content": content,
-        "schema_description": json.dumps(schema),
-        "model_name": "openai:gpt-4o"
-    },
-    headers={"X-API-Key": api_key}
-)
-
-print(response.json())
+# Example result:
+# {
+#   "success": true,
+#   "data": {
+#     "name": "John Smith",
+#     "age": 32,
+#     "height": 182.5,
+#     "occupation": "software engineer"
+#   },
+#   "model_used": "openai:gpt-4o"
+# }
 ```
 
-**Response:**
+### 2. Model Generation
 
-```json
-{
-  "success": true,
-  "data": {
-    "name": "John",
-    "age": 32,
-    "height": 182.5,
-    "occupation": "software engineer"
-  },
-  "error": null,
-  "model_used": "openai:gpt-4o"
-}
+```python
+async def generate_model(sample_data, model_name, description, api_key):
+    response = await httpx.AsyncClient().post(
+        "http://localhost:8000/api/v1/generate-model",
+        json={
+            "sample_data": sample_data,
+            "model_name": model_name,
+            "description": description,
+            "llm_model_name": "openai:gpt-4o"
+        },
+        headers={"X-API-Key": api_key}
+    )
+    
+    return response.json()
+
+# Generated model code can be used directly in your application!
 ```
 
-Check the [examples](examples/) directory for more detailed examples.
+Check out the [examples](examples/) directory for more detailed examples including:
+
+- Structuring different types of content (person info, books, news articles)
+- Comparing different AI models on the same task
+- Generating models from JSON, text, and CSV data
+- Working with nested data structures
+- Adding validation rules
 
 ## 🔍 API Documentation
 
 Visit http://localhost:8000/docs to view the complete API documentation.
 
+### Main Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `/api/v1/structure` | Structure text data using a provided schema |
+| `/api/v1/generate-model` | Generate a Pydantic model from sample data |
+
+## 🧠 Supported AI Models
+
+SchemaForge AI is designed with flexibility in mind. You can use models from any supported provider by specifying them in the format `provider:model_name`:
+
+- **OpenAI**: Any model from their lineup including gpt-3.5-turbo, gpt-4, gpt-4o, and future models as they become available
+- **Anthropic**: Any Claude model including the Claude 3 family (Opus, Sonnet, Haiku) and future releases
+- **Google**: Gemini models including gemini-1.5-pro, gemini-1.5-flash, and newer versions
+- **Mistral**: Any Mistral AI models including mistral-large, mistral-small, and their latest versions
+- **Cohere**: Command models and any new Cohere releases
+- **Groq**: LLaMA and other models available through Groq's fast inference platform
+
+The service doesn't restrict you to specific model versions - as providers release new models, you can immediately use them by specifying them in your requests without waiting for updates to this service.
+
+Specify any model using the format: `provider:model_name` (e.g., `openai:gpt-4o` or `anthropic:claude-3-sonnet-20240229`)
+
 ## 🛠️ Advanced Configuration
 
-See the [configuration documentation](docs/configuration.md) for more information about customization and configuration.
+See the [configuration documentation](docs/configuration.md) for more information about customization options:
+
+- Custom system prompts
+- Retry behavior
+- Timeout settings
+- Model-specific parameters
+- Caching options
+
+## 🔮 Future Plans
+
+We're continuously working to improve SchemaForge AI. Here are some of the features we plan to implement:
+
+- **Additional AI Providers** - Expand support to include more LLM providers as they become available
+- **Enhanced Input Processing** - Support for more complex input formats including tables, PDFs, and images
+- **Performance Optimization** - Improvements to processing speed and resource utilization
+- **Advanced Validation Rules** - More sophisticated validation capabilities for generated models
+- **Web Interface** - A browser-based management console for easier configuration and testing
+- **Output Format Extensions** - Support for generating models in additional programming languages beyond Python/Pydantic
+- **Batch Processing API** - Efficiently process multiple structuring requests in a single operation
+
+If you have suggestions for additional features, please share them in our [Discussion Forum](https://github.com/X-Zero-L/schemaforge-ai/discussions)!
+
+## 🌍 Multi-language Support
+
+While our examples are primarily in Python, the SchemaForge AI API can be integrated with any programming language capable of making HTTP requests. We welcome community contributions of integration examples in other languages!
+
+If you've implemented SchemaForge AI in your favorite language, please consider sharing your code samples. We'd love to include examples for:
+
+- JavaScript/TypeScript (Node.js, browser)
+- Java
+- Go
+- C#/.NET
+- PHP
+- Ruby
+- Rust
+- And more!
+
+This helps make SchemaForge AI more accessible to developers from different backgrounds and ecosystems. Submit your examples through a pull request or share them in the discussions.
 
 ## 🤝 Contributing
 

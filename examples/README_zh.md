@@ -1,68 +1,79 @@
-# 结构化API使用示例
+# SchemaForge AI 示例
 
-本目录包含了如何使用预定义的Pydantic模型来调用结构化API的示例代码，支持多种AI模型。
+本目录包含全面的示例，展示如何使用SchemaForge AI进行数据结构化和生成Pydantic模型。
 
 *[English Documentation](README.md)*
 
-## 示例说明
+## 快速概览
 
-`predefined_models.py` 文件展示了多个用例：
+本目录中的示例展示了使用SchemaForge AI的两种主要方式：
 
-1. 人物信息结构化
-   - 使用 `Person` 模型
-   - 包含姓名、年龄、身高和职业信息
-   - 展示了如何使用自定义系统提示词
+1. **使用预定义模型** - 手动定义Pydantic模型并用于结构化数据
+2. **自动生成模型** - 从样本数据自动生成Pydantic模型
 
-2. 图书信息结构化
-   - 使用 `BookInfo` 模型
-   - 包含书名、作者、出版年份、价格和分类信息
-   - 展示了如何处理列表类型的字段
+## 文件说明
 
-3. 新闻文章结构化
-   - 使用 `NewsArticle` 模型
-   - 包含标题、内容、日期、来源和标签信息
-   - 展示了如何处理多行文本内容
+### `predefined_models.py`
 
-4. 模型对比
-   - 演示如何使用不同AI模型结构化相同内容
-   - 比较OpenAI和Anthropic模型的结果
-   - 展示如何处理模型特定的API错误
+演示如何使用预定义的Pydantic模型从文本输入中结构化数据的多个实用示例：
 
-## 认证
+| 示例                      | 描述                                   | 使用的模型      |
+|--------------------------|----------------------------------------|----------------|
+| 人物信息                  | 从文本中提取个人详细信息                 | `Person`       |
+| 图书信息                  | 将描述性文本结构化为图书元数据           | `BookInfo`     |
+| 新闻文章                  | 将新闻文章解析为结构化数据               | `NewsArticle`  |
+| 模型比较                  | 比较不同AI模型在相同任务上的表现         | 多个模型        |
+| 自定义食谱模型            | 展示如何创建和使用自定义模型             | `Recipe`       |
 
-API需要使用API密钥进行认证。要使用示例：
+### `model_generation_example.py`
 
-1. 确保在项目根目录中有一个包含API密钥的`.env`文件：
-```
-API_KEY=你的安全API密钥
-```
+展示如何从不同类型的数据样本自动生成Pydantic模型：
 
-2. 示例代码会自动加载此密钥并将其包含在所有请求中。
+| 示例                        | 描述                                     | 数据格式 |
+|----------------------------|------------------------------------------|---------|
+| 产品模型                    | 从JSON产品数据生成模型                    | JSON    |
+| 带有特定要求的客户模型      | 创建具有特定验证要求的模型                | 文本     |
+| 图书模型                    | 从类CSV数据生成模型                       | CSV     |
+| 复杂嵌套订单模型            | 从复杂JSON创建具有嵌套结构的模型          | JSON    |
 
-3. 如果未设置API密钥，示例将显示警告并退出。
+## 设置
 
-## 如何运行示例
+在运行这些示例之前，确保：
 
-1. 确保API服务已经启动：
-```bash
-uvicorn app.main:app --reload
-```
+1. 您已设置SchemaForge AI服务：
+   ```bash
+   git clone https://github.com/X-Zero-L/schemaforge-ai.git
+   cd schemaforge-ai
+   uv sync  # 或 pip install -r requirements.txt
+   ```
 
-2. 安装依赖：
-```bash
-pip install -r requirements.txt
-```
+2. 您在`.env`文件中有API密钥：
+   ```
+   API_KEY=您的API密钥
+   ```
 
-3. 确保在`.env`文件中设置了API密钥
+3. API服务正在运行：
+   ```bash
+   uvicorn app.main:app --reload
+   ```
 
-4. 运行示例：
+## 运行示例
+
+要运行任何示例：
+
 ```bash
 python examples/predefined_models.py
 ```
 
-## 使用自定义模型
+或
 
-你可以参考示例中的模型定义方式，创建自己的Pydantic模型：
+```bash
+python examples/model_generation_example.py
+```
+
+## 创建自己的模型
+
+您可以按照此模式创建自定义Pydantic模型：
 
 ```python
 from pydantic import BaseModel, Field
@@ -74,41 +85,40 @@ class YourModel(BaseModel):
     field3: Optional[List[str]] = Field(default_factory=list, description="字段3的描述")
 ```
 
-然后使用 `structure_data()` 函数来调用API，指定你偏好的模型：
+每个Field中的`description`很重要 - 它帮助AI理解需要提取什么信息。
+
+## 生成模型
+
+如果您不想手动定义模型，可以使用模型生成API：
 
 ```python
-result = await structure_data(
-    content="你的文本内容",
-    model=YourModel,
-    system_prompt="可选的系统提示词",
-    model_name="openai:gpt-4o"  # 指定要使用的AI模型
+result = await generate_model(
+    sample_data="您的样本数据（JSON、文本、CSV等）",
+    model_name="您的模型名称",
+    description="模型表示内容的描述",
+    requirements="可选的特定要求",
+    llm_model_name="openai:gpt-4o"  # 指定要使用的AI模型
 )
+
+# 生成的模型代码可在这里获取：
+generated_code = result["model_code"]
 ```
 
-## 可用模型
+## 最佳实践
 
-API支持来自不同提供商的各种模型，包括：
+1. **字段描述**：始终为每个字段提供清晰的描述
+2. **系统提示词**：对于复杂任务，使用系统提示词提高结构化准确性
+3. **模型选择**：不同模型有不同优势 - 实验找出最适合您用例的模型
+4. **验证规则**：生成模型时，指定验证要求以提高数据质量
+5. **错误处理**：始终检查响应中的`success`字段并适当处理错误
 
-- OpenAI模型（gpt-3.5-turbo, gpt-4, gpt-4o）
-- Anthropic模型（claude-3-opus-latest, claude-3-sonnet-latest）
-- Google模型（gemini-1.5-pro, gemini-1.5-flash）
-- Mistral模型（mistral-large-latest, mistral-small-latest）
+## 支持的AI模型
 
-## 动态模型创建
+示例支持多种AI模型，包括：
 
-API服务会自动从传递的模型JSON Schema中提取字段信息，创建动态Pydantic模型。这使得你可以：
+- **OpenAI**：gpt-3.5-turbo、gpt-4、gpt-4o
+- **Anthropic**：claude-3-opus-latest、claude-3-7-sonnet-latest
+- **Google**：gemini-1.5-pro、gemini-1.5-flash
+- **Mistral**：mistral-large-latest、mistral-small-latest
 
-1. 使用Pydantic定义结构化数据模型
-2. 传递模型的JSON Schema到API
-3. API会使用`create_model`动态创建相同结构的模型
-4. 系统提示词可用来指导LLM如何解析内容
-
-## 注意事项
-
-1. 模型定义时要善用Field的description参数，它会帮助API更好地理解字段的含义
-2. 对于可选字段，使用Optional类型标注
-3. 对于列表类型，建议使用default_factory=list作为默认值
-4. 系统提示词可以提高结构化准确性，但不是必需的
-5. 不同的AI模型可能对相同内容的结构化结果略有不同
-6. 确保在.env文件中为你想使用的模型提供了适当的API密钥
-7. 除非服务器禁用了认证，否则API密钥是必需的 
+使用格式指定模型：`provider:model_name`（例如，`openai:gpt-4o`） 
