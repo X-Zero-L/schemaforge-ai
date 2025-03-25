@@ -6,10 +6,11 @@ This directory contains comprehensive examples demonstrating how to use SchemaFo
 
 ## Quick Overview
 
-The examples in this directory show two main ways to use SchemaForge AI:
+The examples in this directory show three main ways to use SchemaForge AI:
 
 1. **Using Predefined Models** - Define Pydantic models manually and use them to structure data
 2. **Auto-Generating Models** - Generate Pydantic models automatically from sample data
+3. **Using the SDK Wrapper** - Use a simple SDK wrapper to simplify integrating with SchemaForge AI
 
 ## File Descriptions
 
@@ -35,6 +36,18 @@ Shows how to automatically generate Pydantic models from different types of data
 | Customer Model with Requirements | Creates a model with specific validation requirements    | Text        |
 | Book Model                     | Generates a model from CSV-like data                     | CSV         |
 | Complex Nested Order Model     | Creates models with nested structures from complex JSON  | JSON        |
+
+### `schemaforge_sdk.py` and `schemaforge_sdk_zh.py`
+
+Provides an SDK wrapper to simplify integration with SchemaForge AI:
+
+- **Client Abstraction** - Handles API authentication, request formatting, and response parsing
+- **Type Safety** - Includes proper type hints and generic support
+- **Synchronous & Asynchronous** - Both interface styles for different application needs
+- **Model Loading Utility** - Helper to convert generated code into usable model classes
+- **Error Handling** - Clear error messages and proper exception handling
+
+See the [SDK Example Documentation](sdk_README.md) for detailed usage instructions.
 
 ## Setting Up
 
@@ -69,6 +82,12 @@ or
 
 ```bash
 python examples/model_generation_example.py
+```
+
+or
+
+```bash
+python examples/schemaforge_sdk.py
 ```
 
 ## Creating Your Own Models
@@ -111,6 +130,7 @@ generated_code = result["model_code"]
 3. **Model Selection**: Different models have different strengths - experiment to find the best for your use case
 4. **Validation Rules**: When generating models, specify validation requirements for better data quality
 5. **Error Handling**: Always check the `success` field in responses and handle errors appropriately
+6. **SDK Usage**: For production integration, consider using the SDK approach to simplify your code
 
 ## Supported AI Models
 

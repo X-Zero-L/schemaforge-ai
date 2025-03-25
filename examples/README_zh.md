@@ -6,10 +6,11 @@
 
 ## 快速概览
 
-本目录中的示例展示了使用SchemaForge AI的两种主要方式：
+本目录中的示例展示了使用SchemaForge AI的三种主要方式：
 
 1. **使用预定义模型** - 手动定义Pydantic模型并用于结构化数据
 2. **自动生成模型** - 从样本数据自动生成Pydantic模型
+3. **使用SDK封装** - 使用简单的SDK封装简化与SchemaForge AI的集成
 
 ## 文件说明
 
@@ -35,6 +36,18 @@
 | 带有特定要求的客户模型      | 创建具有特定验证要求的模型                | 文本     |
 | 图书模型                    | 从类CSV数据生成模型                       | CSV     |
 | 复杂嵌套订单模型            | 从复杂JSON创建具有嵌套结构的模型          | JSON    |
+
+### `schemaforge_sdk.py` 和 `schemaforge_sdk_zh.py`
+
+提供SDK封装，简化与SchemaForge AI的集成：
+
+- **客户端抽象** - 处理API认证、请求格式化和响应解析
+- **类型安全** - 包括适当的类型提示和泛型支持
+- **同步和异步** - 为不同应用需求提供两种接口风格
+- **模型加载工具** - 帮助将生成的代码转换为可用的模型类
+- **错误处理** - 清晰的错误消息和适当的异常处理
+
+详细使用说明请参阅[SDK示例文档](sdk_README_zh.md)。
 
 ## 设置
 
@@ -69,6 +82,12 @@ python examples/predefined_models.py
 
 ```bash
 python examples/model_generation_example.py
+```
+
+或
+
+```bash
+python examples/schemaforge_sdk_zh.py
 ```
 
 ## 创建自己的模型
@@ -111,6 +130,7 @@ generated_code = result["model_code"]
 3. **模型选择**：不同模型有不同优势 - 实验找出最适合您用例的模型
 4. **验证规则**：生成模型时，指定验证要求以提高数据质量
 5. **错误处理**：始终检查响应中的`success`字段并适当处理错误
+6. **使用SDK**：对于生产集成，考虑使用SDK方法简化代码
 
 ## 支持的AI模型
 
