@@ -8,10 +8,6 @@
 
 SchemaForge AI is a service based on FastAPI and Pydantic designed to solve the problem of developers repeatedly writing code and prompts to have AI convert text into structured data. By providing a unified API interface, developers only need to define the desired data structure without writing specialized prompts and processing logic each time. Supports multiple AI providers including OpenAI, Anthropic, Google, and more.
 
-<p align="center">
-  <img src="https://via.placeholder.com/800x400?text=SchemaForge+AI" alt="SchemaForge AI Banner" width="800">
-</p>
-
 _[中文文档](README_zh.md)_
 
 ## ✨ Core Features
