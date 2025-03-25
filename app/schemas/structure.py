@@ -66,6 +66,7 @@ class ModelGenerationResponse(BaseModel):
     success: bool = Field(..., description="Whether model generation was successful")
     model_name: str = Field(..., description="Name of the generated model")
     model_code: str = Field(..., description="Generated model code in Python using Pydantic")
+    json_schema: Dict[str, Any] = Field(..., description="JSON Schema representation of the generated model, suitable for use in any programming language")
     fields: List[ModelFieldDefinition] = Field(..., description="List of fields in the generated model")
     model_used: str = Field(..., description="The model used for generation")
     error: Optional[str] = Field(None, description="Error message if generation failed")

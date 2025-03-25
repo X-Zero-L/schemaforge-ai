@@ -136,8 +136,16 @@ async def generate_model(sample_data, model_name, description, api_key):
     
     return response.json()
 
-# 生成的模型代码可直接在应用中使用！
+# 响应包含：
+# - model_code: 生成的Pydantic模型代码（适用于Python）
+# - json_schema: JSON Schema表示（适用于任何编程语言）
+# - fields: 结构化的字段定义
 ```
+
+API同时返回Python Pydantic代码和JSON Schema表示，使您能够：
+- 在Python应用中直接使用Pydantic模型
+- 使用JSON Schema在任何其他语言中生成模型
+- 在JavaScript、Java、C#、Go或任何支持JSON Schema的语言中构建验证
 
 查看[examples](examples/)目录获取更详细的示例，包括：
 

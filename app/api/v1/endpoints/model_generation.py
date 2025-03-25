@@ -33,13 +33,14 @@ async def generate_model(
         llm_model_name = request.llm_model_name or settings.DEFAULT_MODEL
         
         # Generate the model
-        model_code, fields, used_model = await model_generation_service.generate_model(request, llm_model_name)
+        model_code, json_schema, fields, used_model = await model_generation_service.generate_model(request, llm_model_name)
         
         # Return successful response
         data = ModelGenerationResponse(
             success=True,
             model_name=request.model_name,
             model_code=model_code,
+            json_schema=json_schema,
             fields=fields,
             model_used=used_model
         )

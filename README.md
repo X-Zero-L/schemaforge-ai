@@ -140,8 +140,16 @@ async def generate_model(sample_data, model_name, description, api_key):
     
     return response.json()
 
-# Generated model code can be used directly in your application!
+# Response includes:
+# - model_code: Generated Pydantic model code (for Python)
+# - json_schema: JSON Schema representation (for any programming language)
+# - fields: Structured field definitions
 ```
+
+The API returns both Python Pydantic code and a JSON Schema representation, allowing you to:
+- Use the Pydantic model directly in Python applications
+- Use the JSON Schema to generate models in any other language
+- Build validations in JavaScript, Java, C#, Go, or any other language that supports JSON Schema
 
 Check out the [examples](examples/) directory for more detailed examples including:
 

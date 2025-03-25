@@ -3,7 +3,8 @@ Service module for handling model generation.
 """
 
 import json
-from typing import Dict, Any, List, Tuple
+import re
+from typing import Dict, Any, List, Tuple, Optional
 from pydantic import BaseModel, Field, create_model
 from pydantic_ai import Agent
 
@@ -15,7 +16,7 @@ logger = get_logger(__name__)
 
 async def generate_model(
     request: ModelGenerationRequest, llm_model_name: str
-) -> Tuple[str, List[ModelFieldDefinition], str]:
+) -> Tuple[str, Dict[str, Any], List[ModelFieldDefinition], str]:
     """
     Generate a Pydantic model based on the request.
 
@@ -24,7 +25,7 @@ async def generate_model(
         llm_model_name: The name of the LLM model to use
 
     Returns:
-        A tuple containing the generated model code, list of fields, and the model used
+        A tuple containing the generated model code, JSON schema, list of fields, and the model used
 
     Raises:
         Exception: If there's an error processing the request
@@ -33,6 +34,7 @@ async def generate_model(
         # Define the ModelGenerator dynamic model
         class ModelGeneratorOutput(BaseModel):
             model_code: str = Field(..., description="The generated model code in Python using Pydantic")
+            json_schema: Dict[str, Any] = Field(..., description="JSON Schema representation of the generated model")
             fields: List[ModelFieldDefinition] = Field(..., description="List of fields defined in the model")
             rationale: str = Field(..., description="Explanation of why these fields were chosen and how they relate to the sample data")
 
@@ -53,6 +55,9 @@ The model should follow best practices for Pydantic models, including:
 
 The output model should be production-ready and follow PEP 8 standards.
 Ensure imports are specified correctly at the top of the file.
+
+Additionally, you need to provide a JSON Schema representation of the model, which follows the OpenAPI specification.
+The JSON schema should accurately represent the structure, types, and constraints of the Pydantic model.
 """
             
             if request.requirements:
@@ -77,8 +82,8 @@ Ensure imports are specified correctly at the top of the file.
         # Run the agent to get the model generation result
         result = await agent.run(json.dumps(structured_input))
         
-        # Return the generated model code, fields, and model used
-        return result.data.model_code, result.data.fields, llm_model_name
+        # Return the generated model code, JSON schema, fields, and model used
+        return result.data.model_code, result.data.json_schema, result.data.fields, llm_model_name
 
     except Exception as e:
         logger.error(f"Error generating model: {e}", _exc_info=True)
