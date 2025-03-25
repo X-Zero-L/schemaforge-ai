@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, create_model
 from pydantic_ai import Agent
 
 from app.core.logging import get_logger
+from app.core.config import settings
 from app.schemas.structure import ModelGenerationRequest, ModelFieldDefinition
 
 logger = get_logger(__name__)
@@ -33,13 +34,24 @@ async def generate_model(
     try:
         # Define the ModelGenerator dynamic model
         class ModelGeneratorOutput(BaseModel):
-            model_code: str = Field(..., description="The generated model code in Python using Pydantic")
-            json_schema: Dict[str, Any] = Field(..., description="JSON Schema representation of the generated model")
-            fields: List[ModelFieldDefinition] = Field(..., description="List of fields defined in the model")
-            rationale: str = Field(..., description="Explanation of why these fields were chosen and how they relate to the sample data")
+            model_code: str = Field(
+                ..., description="The generated model code in Python using Pydantic"
+            )
+            json_schema: Dict[str, Any] = Field(
+                ..., description="JSON Schema representation of the generated model"
+            )
+            fields: List[ModelFieldDefinition] = Field(
+                ..., description="List of fields defined in the model"
+            )
+            rationale: str = Field(
+                ...,
+                description="Explanation of why these fields were chosen and how they relate to the sample data",
+            )
 
         # Initialize agent with specified model
-        agent = Agent(llm_model_name, result_type=ModelGeneratorOutput)
+        agent = Agent(
+            llm_model_name, result_type=ModelGeneratorOutput, retries=settings.RETRIES
+        )
 
         # Set system prompt
         @agent.system_prompt
@@ -59,32 +71,41 @@ Ensure imports are specified correctly at the top of the file.
 Additionally, you need to provide a JSON Schema representation of the model, which follows the OpenAPI specification.
 The JSON schema should accurately represent the structure, types, and constraints of the Pydantic model.
 """
-            
+
             if request.requirements:
                 base_prompt += f"\nThe model should adhere to these specific requirements: {request.requirements}"
-                
+
             if request.expected_fields:
                 base_prompt += "\nThe model should include these expected fields, but you can add more if needed based on the sample data:"
                 for field in request.expected_fields:
-                    default_info = f", default={field.default}" if field.default is not None else ""
+                    default_info = (
+                        f", default={field.default}"
+                        if field.default is not None
+                        else ""
+                    )
                     required_info = "required" if field.required else "optional"
                     base_prompt += f"\n- {field.name} ({field.field_type}, {required_info}): {field.description}{default_info}"
-                    
+
             return base_prompt
 
         # Create a structured input object
         structured_input = {
             "sample_data": request.sample_data,
             "model_name": request.model_name,
-            "description": request.description
+            "description": request.description,
         }
-        
+
         # Run the agent to get the model generation result
         result = await agent.run(json.dumps(structured_input))
-        
+
         # Return the generated model code, JSON schema, fields, and model used
-        return result.data.model_code, result.data.json_schema, result.data.fields, llm_model_name
+        return (
+            result.data.model_code,
+            result.data.json_schema,
+            result.data.fields,
+            llm_model_name,
+        )
 
     except Exception as e:
         logger.error(f"Error generating model: {e}", _exc_info=True)
-        raise e 
+        raise e

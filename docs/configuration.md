@@ -16,6 +16,9 @@ REQUIRE_AUTH=true
 # Default model to use when none specified
 DEFAULT_MODEL=openai:gpt-4o
 
+# Number of retry attempts for AI model outputs if they fail validation
+RETRIES=3
+
 # OpenAI configuration
 OPENAI_API_KEY=your_openai_key_here
 OPENAI_BASE_URL=https://api.openai.com/v1  # Optional
@@ -109,6 +112,16 @@ Response example:
   "success": true,
   "model_name": "Product",
   "model_code": "...(Generated model code)...",
+  "json_schema": {
+    "type": "object",
+    "properties": {
+      "product_id": {"type": "string", "description": "Unique identifier for the product"},
+      "name": {"type": "string", "description": "Product name"},
+      "price": {"type": "number", "description": "Product price"},
+      "in_stock": {"type": "boolean", "description": "Whether the product is in stock"}
+    },
+    "required": ["product_id", "name", "price"]
+  },
   "fields": [...],
   "model_used": "openai:gpt-4o"
 }
@@ -158,4 +171,22 @@ Error example:
   "data": null,
   "model_used": "openai:gpt-4"
 }
-``` 
+```
+
+## Retry Behavior
+
+SchemaForge AI includes an automatic retry mechanism for when AI models produce outputs that fail validation. The system will attempt to regenerate valid responses without requiring client intervention.
+
+The `RETRIES` environment variable controls how many retry attempts will be made:
+
+```
+# Default is 3 retries
+RETRIES=3
+```
+
+This is especially useful for:
+- Complex schema validations where models might occasionally produce invalid structures
+- Fields with specific format requirements (dates, email addresses, etc.)
+- Processing ambiguous content where the first parsing attempt might fail
+
+When all retry attempts are exhausted, the API will return an error response with details about the validation failures. 

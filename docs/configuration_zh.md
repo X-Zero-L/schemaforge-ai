@@ -16,6 +16,9 @@ REQUIRE_AUTH=true
 # 默认使用的模型
 DEFAULT_MODEL=openai:gpt-4o
 
+# AI模型输出验证失败时的重试次数
+RETRIES=3
+
 # OpenAI配置
 OPENAI_API_KEY=your_openai_key_here
 OPENAI_BASE_URL=https://api.openai.com/v1  # 可选
@@ -109,6 +112,16 @@ POST /api/v1/generate-model
   "success": true,
   "model_name": "Product",
   "model_code": "...(生成的模型代码)...",
+  "json_schema": {
+    "type": "object",
+    "properties": {
+      "product_id": {"type": "string", "description": "产品唯一标识符"},
+      "name": {"type": "string", "description": "产品名称"},
+      "price": {"type": "number", "description": "产品价格"},
+      "in_stock": {"type": "boolean", "description": "产品是否有库存"}
+    },
+    "required": ["product_id", "name", "price"]
+  },
   "fields": [...],
   "model_used": "openai:gpt-4o"
 }
@@ -137,7 +150,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - API_KEY=your_secure_api_key
+      - API_KEY=your_secure_api_key_here
       - REQUIRE_AUTH=true
       - OPENAI_API_KEY=your_openai_api_key
       - ANTHROPIC_API_KEY=your_anthropic_api_key
@@ -158,4 +171,22 @@ API响应包含`success`字段。如果`success`为`false`，`error`字段提供
   "data": null,
   "model_used": "openai:gpt-4"
 }
-``` 
+```
+
+## 重试行为
+
+SchemaForge AI包含一个自动重试机制，用于处理AI模型产生未通过验证的输出情况。系统将尝试重新生成有效响应，无需客户端干预。
+
+`RETRIES`环境变量控制重试尝试的次数：
+
+```
+# 默认为3次重试
+RETRIES=3
+```
+
+这对以下情况特别有用：
+- 复杂的架构验证，模型可能偶尔会产生无效结构
+- 具有特定格式要求的字段（日期、电子邮件地址等）
+- 处理模糊内容，首次解析尝试可能失败
+
+当所有重试尝试都用尽时，API将返回带有验证失败详情的错误响应。 

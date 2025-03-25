@@ -46,24 +46,11 @@ class Settings(BaseSettings):
 
     GROQ_API_KEY: Optional[str] = os.getenv("GROQ_API_KEY")
 
+    RETRIES: int = 3
+
     class Config:
         env_file = ".env"
         case_sensitive = True
 
 
 settings = Settings()
-
-
-# Dictionary of supported model categories for API reference
-SUPPORTED_MODEL_CATEGORIES: Dict[str, List[str]] = {
-    "openai": ["gpt-3.5-turbo", "gpt-4", "gpt-4o", "gpt-4o-mini"],
-    "anthropic": [
-        "claude-3-5-sonnet-latest",
-        "claude-3-opus-latest",
-        "claude-3-7-sonnet-latest",
-    ],
-    "google": ["google-gla:gemini-1.5-pro", "google-gla:gemini-1.5-flash"],
-    "mistral": ["mistral:mistral-large-latest", "mistral:mistral-small-latest"],
-    "cohere": ["cohere:command-r", "cohere:command-r-plus"],
-    "groq": ["groq:llama-3.1-8b-instant", "groq:llama-3.2-90b-vision-preview"],
-}

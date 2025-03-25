@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, create_model
 from pydantic_ai import Agent
 
 from app.core.logging import get_logger
+from app.core.config import settings
 from app.schemas.structure import StructuredRequest
 
 logger = get_logger(__name__)
@@ -36,7 +37,7 @@ async def process_structured_data(
         )
 
         # Initialize agent with specified model
-        agent = Agent(model_name, result_type=dynamic_model)
+        agent = Agent(model_name, result_type=dynamic_model, retries=settings.RETRIES)
 
         # Set system prompt
         @agent.system_prompt
