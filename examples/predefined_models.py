@@ -85,7 +85,7 @@ async def structure_data(
         response = await client.post(
             f"{API_BASE_URL}/api/v1/structure",
             json=request_data,
-            headers={"X-API-Key": API_KEY},
+            headers={"Authorization": f"Bearer {API_KEY}"},
             timeout=60
         )
         return response.json()

@@ -105,7 +105,7 @@ async def structure_data(content, model, api_key):
             "schema_description": json.dumps(schema_json),
             "model_name": "openai:gpt-4o"
         },
-        headers={"X-API-Key": api_key}
+        headers={"Authorization": "Bearer your_api_key"}
     )
     
     return response.json()
@@ -135,7 +135,7 @@ async def generate_model(sample_data, model_name, description, api_key):
             "description": description,
             "llm_model_name": "openai:gpt-4o"
         },
-        headers={"X-API-Key": api_key}
+        headers={"Authorization": "Bearer your_api_key"}
     )
     
     return response.json()
@@ -187,13 +187,7 @@ Specify any model using the format: `provider:model_name` (e.g., `openai:gpt-4o`
 
 ## 🛠️ Advanced Configuration
 
-See the [configuration documentation](docs/configuration.md) for more information about customization options:
-
-- Custom system prompts
-- Retry behavior
-- Timeout settings
-- Model-specific parameters
-- Caching options
+See the [configuration documentation](docs/configuration.md) for more information about customization options.
 
 ## 🔮 Future Plans
 
@@ -258,3 +252,45 @@ MIT
     <img src="https://img.shields.io/github/stars/X-Zero-L/schemaforge-ai?style=social" alt="Star on GitHub">
   </a>
 </p>
+
+## SDK for Easy Integration
+
+For easier integration with your applications, we provide an official Python SDK:
+
+<div align="center">
+  <h3>
+    <a href="https://github.com/X-Zero-L/schemaforge-sdk">
+      📦 SchemaForge SDK
+    </a>
+  </h3>
+  <p>Seamless integration for Python applications</p>
+</div>
+
+The SDK provides a clean, Pythonic interface to SchemaForge AI:
+
+```python
+from pydantic import BaseModel
+from schemaforge import SchemaForge
+
+# Initialize client
+client = SchemaForge(api_key="your_secure_api_key_here")
+
+# Define a Pydantic model
+class Person(BaseModel):
+    name: str
+    age: int
+    occupation: str
+    email: str
+
+# Structure text using the model
+person = client.structure(
+    content="John is a 30-year-old software engineer with email john@example.com",
+    model_class=Person
+)
+print(person.model_dump())
+# {'name': 'John', 'age': 30, 'occupation': 'software engineer', 'email': 'john@example.com'}
+```
+
+[Visit the SDK repository](https://github.com/X-Zero-L/schemaforge-sdk) for installation instructions, documentation, and examples.
+
+## 🛠️ Advanced Configuration

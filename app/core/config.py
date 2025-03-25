@@ -19,7 +19,7 @@ class Settings(BaseSettings):
 
     # Auth settings
     API_KEY: str = os.getenv("API_KEY", "")
-    API_KEY_NAME: str = "X-API-Key"
+    API_KEY_NAME: str = "Authorization"
     REQUIRE_AUTH: bool = os.getenv("REQUIRE_AUTH", "true").lower() == "true"
 
     # CORS settings

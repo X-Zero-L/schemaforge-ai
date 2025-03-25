@@ -36,12 +36,17 @@ async def get_api_key(api_key_header: str = Security(api_key_header)):
             detail="API key authentication is enabled but no API key is set on the server",
         )
     
-    if api_key_header != settings.API_KEY:
+    if api_key_header and api_key_header.startswith("Bearer "):
+        api_key = api_key_header.split(" ")[1]
+    else:
+        api_key = api_key_header
+    
+    if api_key != settings.API_KEY:
         logger.warning("Invalid API key attempt")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid API key",
-            headers={"WWW-Authenticate": settings.API_KEY_NAME},
+            headers={"WWW-Authenticate": "Bearer"},
         )
     
-    return api_key_header 
+    return api_key 

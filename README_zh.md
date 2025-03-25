@@ -101,7 +101,7 @@ async def structure_data(content, model, api_key):
             "schema_description": json.dumps(schema_json),
             "model_name": "openai:gpt-4o"
         },
-        headers={"X-API-Key": api_key}
+        headers={"Authorization": "Bearer your_api_key"}
     )
     
     return response.json()
@@ -131,7 +131,7 @@ async def generate_model(sample_data, model_name, description, api_key):
             "description": description,
             "llm_model_name": "openai:gpt-4o"
         },
-        headers={"X-API-Key": api_key}
+        headers={"Authorization": "Bearer your_api_key"}
     )
     
     return response.json()
@@ -183,13 +183,7 @@ SchemaForge AI设计理念注重灵活性。您可以通过`提供商:模型名�
 
 ## 🛠️ 高级配置
 
-查看[配置文档](docs/configuration.md)了解更多关于自定义选项的信息：
-
-- 自定义系统提示词
-- 重试行为
-- 超时设置
-- 模型特定参数
-- 缓存选项
+查看[配置文档](docs/configuration.md)了解更多关于自定义选项的信息。
 
 ## 🔮 未来计划
 
@@ -253,4 +247,46 @@ MIT
   <a href="https://github.com/X-Zero-L/schemaforge-ai">
     <img src="https://img.shields.io/github/stars/X-Zero-L/schemaforge-ai?style=social" alt="Star on GitHub">
   </a> 
-</p> 
+</p>
+
+## SDK 便捷集成
+
+为了更轻松地与您的应用程序集成，我们提供了官方Python SDK:
+
+<div align="center">
+  <h3>
+    <a href="https://github.com/X-Zero-L/schemaforge-sdk">
+      📦 SchemaForge SDK
+    </a>
+  </h3>
+  <p>Python应用程序的无缝集成</p>
+</div>
+
+该SDK提供了一个简洁的、Python风格的SchemaForge AI接口:
+
+```python
+from pydantic import BaseModel
+from schemaforge import SchemaForge
+
+# 初始化客户端
+client = SchemaForge(api_key="your_secure_api_key_here")
+
+# 定义Pydantic模型
+class Person(BaseModel):
+    name: str
+    age: int
+    occupation: str
+    email: str
+
+# 使用模型结构化文本
+person = client.structure(
+    content="张三是一位30岁的软件工程师，邮箱是zhangsan@example.com",
+    model_class=Person
+)
+print(person.model_dump())
+# {'name': '张三', 'age': 30, 'occupation': '软件工程师', 'email': 'zhangsan@example.com'}
+```
+
+[访问SDK仓库](https://github.com/X-Zero-L/schemaforge-sdk)获取安装说明、文档和示例。
+
+## 🛠️ 高级配置 
