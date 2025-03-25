@@ -44,7 +44,7 @@ Before running these examples, make sure:
    ```bash
    git clone https://github.com/X-Zero-L/schemaforge-ai.git
    cd schemaforge-ai
-   uv sync  # or pip install -r requirements.txt
+   uv sync
    ```
 
 2. You have an API key in the `.env` file:

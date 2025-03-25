@@ -44,7 +44,7 @@
    ```bash
    git clone https://github.com/X-Zero-L/schemaforge-ai.git
    cd schemaforge-ai
-   uv sync  # 或 pip install -r requirements.txt
+   uv sync
    ```
 
 2. 您在`.env`文件中有API密钥：
