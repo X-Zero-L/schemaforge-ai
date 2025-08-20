@@ -131,4 +131,4 @@ def create_dynamic_model(
             model_fields[field_name] = process_field(field_name, field_props)
 
         return create_model(schema.get("title", "DynamicModel"), **model_fields)
-    return create_dynamic_model(schema_description)
+    return json_schema_to_base_model(json.loads(schema_description))
