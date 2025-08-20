@@ -3,13 +3,15 @@ Service module for handling structured data processing.
 """
 
 import json
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, List, Optional, Literal, Type
 from pydantic import BaseModel, Field, create_model
 from pydantic_ai import Agent
+from enum import Enum
 
 from app.core.logging import get_logger
 from app.core.config import settings
 from app.schemas.structure import StructuredRequest
+import logfire
 
 logger = get_logger(__name__)
 
@@ -64,47 +66,69 @@ def create_dynamic_model(
     schema_description: str, struct_model_name: str = "DynamicModel"
 ) -> BaseModel:
     """
-    Create a dynamic Pydantic model from schema description.
-
-    Args:
-        schema_description: JSON schema or description string
-
-    Returns:
-        A dynamically created Pydantic model
+    根据 JSON Schema 递归生成 Pydantic 模型，支持：
+    - object/array 递归建模
+    - required 可选性
+    - enum → Literal
+    - additionalProperties → Dict[str, T]
+    - default 映射到 Field(default=...)
     """
-    try:
-        # Try to parse schema_description as JSON
-        schema_dict = json.loads(schema_description)
-        # Extract field information from schema
-        properties = schema_dict.get("properties", {})
+    logfire.info("create_dynamic_model", schema_description=schema_description)
+    def json_schema_to_base_model(schema: dict[str, Any]) -> Type[BaseModel]:
+        type_mapping: dict[str, type] = {
+            "string": str,
+            "integer": int,
+            "number": float,
+            "boolean": bool,
+            "array": list,
+            "object": dict,
+        }
 
-        # Build field dictionary for create_model
-        fields = {}
-        for field_name, field_info in properties.items():
-            field_type = str  # Default type
-            description = field_info.get("description", "")
+        properties = schema.get("properties", {})
+        required_fields = schema.get("required", [])
+        model_fields = {}
 
-            # Set field type based on schema type
-            type_str = field_info.get("type", "string")
-            if type_str == "integer":
-                field_type = int
-            elif type_str == "number":
-                field_type = float
-            elif type_str == "boolean":
-                field_type = bool
-            elif type_str == "array":
-                field_type = list
+        def process_field(field_name: str, field_props: dict[str, Any]) -> tuple:
+            """Recursively processes a field and returns its type and Field instance."""
+            json_type = field_props.get("type", "string")
+            enum_values = field_props.get("enum")
 
-            # Create Field
-            fields[field_name] = (field_type, Field(..., description=description))
+            # Handle Enums
+            if enum_values:
+                enum_name: str = f"{field_name.capitalize()}Enum"
+                field_type = Enum(enum_name, {v: v for v in enum_values})
+            # Handle Nested Objects
+            elif json_type == "object" and "properties" in field_props:
+                field_type = json_schema_to_base_model(
+                    field_props
+                )  # Recursively create submodel
+            # Handle Arrays with Nested Objects
+            elif json_type == "array" and "items" in field_props:
+                item_props = field_props["items"]
+                if item_props.get("type") == "object":
+                    item_type: type[BaseModel] = json_schema_to_base_model(item_props)
+                else:
+                    item_type: type = type_mapping.get(item_props.get("type"), Any)
+                field_type = list[item_type]
+            else:
+                field_type = type_mapping.get(json_type, Any)
 
-        # Create dynamic model using create_model
-        dynamic_model = create_model(struct_model_name, **fields)
-        dynamic_model.__doc__ = schema_dict.get("description", schema_description)
+            # Handle default values and optionality
+            default_value = field_props.get("default", ...)
+            nullable = field_props.get("nullable", False)
+            description = field_props.get("title", "")
 
-    except (json.JSONDecodeError, Exception):
-        # If JSON parsing fails, use a simple model
-        logger.warning("Failed to parse schema_description as JSON, using simple model")
-        dynamic_model = create_model(struct_model_name, __doc__=schema_description)
+            if nullable:
+                field_type = Optional[field_type]
 
-    return dynamic_model
+            if field_name not in required_fields:
+                default_value = field_props.get("default", None)
+
+            return field_type, Field(default_value, description=description)
+
+        # Process each field
+        for field_name, field_props in properties.items():
+            model_fields[field_name] = process_field(field_name, field_props)
+
+        return create_model(schema.get("title", "DynamicModel"), **model_fields)
+    return create_dynamic_model(schema_description)

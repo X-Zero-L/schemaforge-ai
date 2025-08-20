@@ -8,6 +8,7 @@ from app.core.auth import get_api_key
 from app.schemas.structure import StructuredRequest, StructureResponse
 from app.services import structure_service
 from app.core.logging import get_logger
+import logfire
 
 router = APIRouter()
 logger = get_logger(__name__)
@@ -33,7 +34,7 @@ async def structure_data(
         
         # Process the structured data
         data, used_model = await structure_service.process_structured_data(request, model_name)
-        
+        logfire.info("structure_data", data=data, used_model=used_model)
         # Return successful response
         return StructureResponse(
             success=True,
